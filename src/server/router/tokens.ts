@@ -1,5 +1,5 @@
 import { z } from "zod";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import nookies from "nookies";
 
 import { verifyRefreshToken } from "../../utils/token";
@@ -17,7 +17,7 @@ export const tokensRouter = createRouter()
     }),
     async resolve({ ctx, input }) {
       verifyRefreshToken(ctx.req.body)
-        .then(({ tokenDetails }) => {
+        .then(({ tokenDetails }: JwtPayload) => {
           const payload = {
             email: tokenDetails.email,
             xsrfToken: tokenDetails.xsrfToken,

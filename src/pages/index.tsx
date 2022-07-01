@@ -1,6 +1,5 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import argon2 from "argon2";
 
 import { trpc } from "../utils/trpc";
 

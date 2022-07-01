@@ -1,7 +1,13 @@
 import { User } from "@prisma/client";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 import { prisma } from "../server/db/client";
+
+type RefreshToken = {
+  tokenDetails?: string | JwtPayload;
+  error: boolean;
+  message: string;
+};
 
 export const generateTokens = async (user: User, xsrfToken: string) => {
   try {
@@ -36,7 +42,9 @@ export const generateTokens = async (user: User, xsrfToken: string) => {
   }
 };
 
-export const verifyRefreshToken = async (refreshToken: string) => {
+export const verifyRefreshToken = async (
+  refreshToken: string
+): Promise<RefreshToken> => {
   const privateKey = process.env.REFRESH_TOKEN_PRIVATE_KEY as string;
 
   return new Promise(async (resolve, reject) => {
