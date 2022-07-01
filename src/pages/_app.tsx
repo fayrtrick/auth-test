@@ -4,9 +4,28 @@ import type { AppRouter } from "../server/router";
 import type { AppType } from "next/dist/shared/lib/utils";
 import superjson from "superjson";
 import "../styles/globals.css";
+import { AuthProvider, getUser, UserCtx } from "../contexts/AuthContext";
+import App, { AppContext, AppProps } from "next/app";
+import { ComponentType } from "react";
 
-const MyApp: AppType = ({ Component, pageProps }) => {
-  return <Component {...pageProps} />;
+type Props = {
+  Component: ComponentType;
+  pageProps: any;
+  auth: UserCtx;
+};
+
+const MyApp = ({ Component, pageProps, auth }: Props) => {
+  return (
+    <AuthProvider authData={auth}>
+      <Component {...pageProps} />
+    </AuthProvider>
+  );
+};
+
+MyApp.getInitialProps = async (appContext: AppContext) => {
+  const appProps = await App.getInitialProps(appContext);
+  const auth = await getUser(appContext.ctx);
+  return { ...appProps, auth: auth };
 };
 
 const getBaseUrl = () => {
