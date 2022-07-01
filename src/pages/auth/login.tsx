@@ -4,26 +4,28 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { loginSchema } from "../../utils/types";
 import type { LoginData } from "../../utils/types";
-import { trpc } from "../../utils/trpc";
 
 import styles from "../../styles/auth.module.scss";
 import { useAuth } from "../../contexts/AuthContext";
+import { trpc } from "../../utils/trpc";
 
-interface LoginTypes {
+type LoginTypes = {
   email: string;
   password: string;
-}
+};
 
 const Login = () => {
+  const { user, login } = useAuth();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginTypes>({ resolver: zodResolver(loginSchema) });
 
-  const { user } = useAuth();
-
-  const onSubmit = (data: LoginData) => {};
+  const onSubmit = (data: LoginData) => {
+    login();
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>

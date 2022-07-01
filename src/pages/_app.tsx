@@ -1,22 +1,16 @@
 // src/pages/_app.tsx
 import { withTRPC } from "@trpc/next";
 import type { AppRouter } from "../server/router";
-import type { AppType } from "next/dist/shared/lib/utils";
 import superjson from "superjson";
 import "../styles/globals.css";
 import { AuthProvider, getUser, UserCtx } from "../contexts/AuthContext";
-import App, { AppContext, AppProps } from "next/app";
-import { ComponentType } from "react";
+import App, { AppContext } from "next/app";
+import { Component, ComponentType } from "react";
 
-type Props = {
-  Component: ComponentType;
-  pageProps: any;
-  auth: UserCtx;
-};
-
-const MyApp = ({ Component, pageProps, auth }: Props) => {
+const MyApp = ({ Component, pageProps }: any) => {
+  console.log(pageProps.auth);
   return (
-    <AuthProvider authData={auth}>
+    <AuthProvider authData={pageProps.auth}>
       <Component {...pageProps} />
     </AuthProvider>
   );
@@ -25,7 +19,8 @@ const MyApp = ({ Component, pageProps, auth }: Props) => {
 MyApp.getInitialProps = async (appContext: AppContext) => {
   const appProps = await App.getInitialProps(appContext);
   const auth = await getUser(appContext.ctx);
-  return { ...appProps, auth: auth };
+  console.log(auth);
+  return { ...appProps, pageProps: { ...appProps.pageProps, auth } };
 };
 
 const getBaseUrl = () => {
