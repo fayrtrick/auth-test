@@ -11,6 +11,7 @@ const Home: NextPage = () => {
     },
   });
   let registerMutation = trpc.useMutation("auth-v1.register");
+  let logoutMutation = trpc.useMutation("token-v1.logout");
 
   const login = () => {
     loginMutation.mutate({
@@ -42,6 +43,7 @@ const Home: NextPage = () => {
       {registerMutation.error && (
         <p>Something went wrong! {registerMutation.error.message}</p>
       )}
+      <button onClick={() => logoutMutation.mutate()}>logout</button>
     </>
   );
 };

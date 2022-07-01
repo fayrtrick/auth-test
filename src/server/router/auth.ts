@@ -6,7 +6,7 @@ import { z } from "zod";
 import { serialize } from "cookie";
 
 import { createRouter } from "./context";
-import generateTokens from "../../utils/token";
+import { generateTokens } from "../../utils/token";
 
 export const authRouter = createRouter()
   .mutation("register", {

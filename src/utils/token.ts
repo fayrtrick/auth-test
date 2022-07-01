@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 import { prisma } from "../server/db/client";
 
-const generateTokens = async (user: User, xsrfToken: string) => {
+export const generateTokens = async (user: User, xsrfToken: string) => {
   try {
     const payload = { email: user.email, xsrfToken };
     const accessToken = jwt.sign(
@@ -36,4 +36,23 @@ const generateTokens = async (user: User, xsrfToken: string) => {
   }
 };
 
-export default generateTokens;
+export const verifyRefreshToken = async (refreshToken: string) => {
+  const privateKey = process.env.REFRESH_TOKEN_PRIVATE_KEY as string;
+
+  return new Promise(async (resolve, reject) => {
+    const doc = await prisma.userToken.findFirst({
+      where: { token: refreshToken },
+    });
+    if (!doc) {
+      return reject({ error: true, message: "Invalid refresh token." });
+    }
+    jwt.verify(refreshToken, privateKey, (err, tokenDetails) => {
+      if (err) return reject({ error: true, message: "Invalid refresh token" });
+      resolve({
+        tokenDetails,
+        error: false,
+        message: "Valid refresh token",
+      });
+    });
+  });
+};
