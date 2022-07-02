@@ -66,6 +66,7 @@ export const authRouter = createRouter()
         user,
         xsrfToken
       );
+
       nookies.set(ctx, "access_token", accessToken, {
         httpOnly: true,
         secure: false,

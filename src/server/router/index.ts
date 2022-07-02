@@ -7,8 +7,8 @@ import { winesRouter } from "./wines";
 
 export const appRouter = createRouter()
   .transformer(superjson)
-  .merge("auth/v1/", authRouter)
-  .merge("token/v1/", tokensRouter)
-  .merge("wines/v1/", winesRouter);
+  .merge("auth.", authRouter)
+  .merge("token.", tokensRouter)
+  .merge("wines.", winesRouter);
 
 export type AppRouter = typeof appRouter;

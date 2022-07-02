@@ -5,10 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../../contexts/AuthContext";
 import { UserDetails, UserDetailsSchema } from "../../utils/models/auth";
 import styles from "../../styles/auth.module.scss";
+import { trpc } from "../../utils/trpc";
 
 const Login = () => {
-  const { user, login } = useAuth();
-
+  const { user, login, errors: APIError } = useAuth();
   const {
     register,
     handleSubmit,
@@ -16,13 +16,14 @@ const Login = () => {
   } = useForm<UserDetails>({ resolver: zodResolver(UserDetailsSchema) });
 
   const onSubmit = (data: UserDetails) => {
-    login();
+    login.mutate(data);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div>
-        <div>User connected: {user.connected}</div>
+        <div>User connected: {user.connected ? "True" : " False"}</div>
+        <div>{APIError.error && APIError.message}</div>
         <h1>Login</h1>
         <ul>
           {errors.email && <li>{errors.email.message}</li>}

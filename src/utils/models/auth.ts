@@ -1,4 +1,7 @@
+import { TRPCClientErrorLike } from "@trpc/client";
+import { Router } from "next/router";
 import { ReactNode } from "react";
+import { Mutation, UseMutateFunction, UseMutationResult } from "react-query";
 import { z } from "zod";
 
 // Schemas
@@ -19,7 +22,8 @@ export type User = z.infer<typeof UserSchema>;
 export type UserDetails = z.infer<typeof UserDetailsSchema>;
 export type AuthContext = {
   user: UserCtx;
-  login: () => void;
+  errors: ErrorCtx;
+  login: any;
   logout: () => void;
 };
 export type AuthProps = {
@@ -30,6 +34,9 @@ export type UserCtx = {
   connected: boolean;
   details: {
     email?: string;
-    error: boolean;
   };
+};
+export type ErrorCtx = {
+  error: boolean;
+  message: string;
 };
