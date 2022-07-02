@@ -28,40 +28,28 @@ export const AuthProvider = ({ authData, children }: AuthProps) => {
     authData || { connected: false, details: { error: false } }
   );
 
-  const loginMutation = trpc.useMutation("auth-v1.login", {
-    onSuccess(data, variables, context) {
-      setUser({
-        connected: true,
-        details: {
-          email: variables.email,
-          error: false,
-        },
-      });
-    },
-    onError(error, variables, context) {
-      console.log(error);
-      setUser({
-        connected: false,
-        details: { error: true },
-      });
-    },
-  });
+  const getMutation = (mutation: "auth-v1.login" | "token-v1.logout") => {
+    return trpc.useMutation(mutation, {
+      onSuccess(data, variables, context) {
+        const user: UserCtx = { connected: false, details: { error: false } };
+        if (mutation === "auth-v1.login") {
+          user.connected = true;
+          user.details = { ...user.details, email: variables!.email };
+        }
+        setUser(user);
+      },
+      onError(error, variables, context) {
+        console.log(error);
+        setUser({
+          connected: false,
+          details: { error: true },
+        });
+      },
+    });
+  };
 
-  const logoutMutation = trpc.useMutation("token-v1.logout", {
-    onSuccess(data, variables, context) {
-      setUser({
-        connected: true,
-        details: { error: false },
-      });
-    },
-    onError(error, variables, context) {
-      console.log(error);
-      setUser({
-        connected: false,
-        details: { error: true },
-      });
-    },
-  });
+  const loginMutation = getMutation("auth-v1.login");
+  const logoutMutation = getMutation("token-v1.logout");
 
   const login = () => {
     loginMutation.mutate({
