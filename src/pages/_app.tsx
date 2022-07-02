@@ -5,10 +5,8 @@ import superjson from "superjson";
 import "../styles/globals.css";
 import { AuthProvider, getUser, UserCtx } from "../contexts/AuthContext";
 import App, { AppContext } from "next/app";
-import { Component, ComponentType } from "react";
 
 const MyApp = ({ Component, pageProps }: any) => {
-  console.log(pageProps.auth);
   return (
     <AuthProvider authData={pageProps.auth}>
       <Component {...pageProps} />
@@ -19,7 +17,6 @@ const MyApp = ({ Component, pageProps }: any) => {
 MyApp.getInitialProps = async (appContext: AppContext) => {
   const appProps = await App.getInitialProps(appContext);
   const auth = await getUser(appContext.ctx);
-  console.log(auth);
   return { ...appProps, pageProps: { ...appProps.pageProps, auth } };
 };
 

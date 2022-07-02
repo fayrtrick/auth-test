@@ -2,18 +2,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { registerSchema } from "../../utils/types";
-import type { RegisterData } from "../../utils/types";
 import { trpc } from "../../utils/trpc";
-
 import styles from "../../styles/auth.module.scss";
-
-interface RegisterTypes {
-  email: string;
-  forename: string;
-  surname: string;
-  password: string;
-}
+import { User, UserSchema } from "../../utils/models/auth";
 
 const Login = () => {
   const [apiErrors, setApiErrors] = useState("");
@@ -22,7 +13,7 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterTypes>({ resolver: zodResolver(registerSchema) });
+  } = useForm<User>({ resolver: zodResolver(UserSchema) });
 
   const registerMutation = trpc.useMutation("auth-v1.register", {
     onSuccess: (data) => {
@@ -33,7 +24,7 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (data: RegisterData) => {
+  const onSubmit = (data: User) => {
     console.log(JSON.stringify(data));
     registerMutation.mutate(data);
   };

@@ -2,17 +2,9 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { loginSchema } from "../../utils/types";
-import type { LoginData } from "../../utils/types";
-
-import styles from "../../styles/auth.module.scss";
 import { useAuth } from "../../contexts/AuthContext";
-import { trpc } from "../../utils/trpc";
-
-type LoginTypes = {
-  email: string;
-  password: string;
-};
+import { UserDetails, UserDetailsSchema } from "../../utils/models/auth";
+import styles from "../../styles/auth.module.scss";
 
 const Login = () => {
   const { user, login } = useAuth();
@@ -21,9 +13,9 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginTypes>({ resolver: zodResolver(loginSchema) });
+  } = useForm<UserDetails>({ resolver: zodResolver(UserDetailsSchema) });
 
-  const onSubmit = (data: LoginData) => {
+  const onSubmit = (data: UserDetails) => {
     login();
   };
 

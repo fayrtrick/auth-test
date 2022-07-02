@@ -1,63 +1,64 @@
 import { NextPageContext } from "next";
 import React, { createContext, ReactNode, useContext, useState } from "react";
-import nookies, { setCookie, destroyCookie } from "nookies";
-import { boolean } from "zod";
+import nookies from "nookies";
+
 import { trpc } from "../utils/trpc";
+import { AuthContext, AuthProps, UserCtx } from "../utils/models/auth";
 
-type authContextType = {
-  user: UserCtx;
-  login: () => void;
-  logout: () => void;
-};
-
-type Props = {
-  authData: any;
-  children: ReactNode;
-};
-
-export type UserCtx = {
-  connected: boolean;
-  details: {
-    email?: string;
-  };
-};
-
-const authContextDefaultValues: authContextType = {
-  user: { connected: false, details: {} },
+const authContextDefaultValues: AuthContext = {
+  user: { connected: false, details: { error: false } },
   login: () => {},
   logout: () => {},
 };
 
-const AuthContext = createContext<authContextType>(authContextDefaultValues);
+const AuthContext = createContext<AuthContext>(authContextDefaultValues);
 
-export function useAuth() {
+export const useAuth = () => {
   return useContext(AuthContext);
-}
+};
 
 export const getUser = async (ctx: NextPageContext) => {
   const access_token = nookies.get(ctx);
-  const user = { connected: true, details: { email: "toto@gmail.com" } };
+  const user = { connected: false, details: { error: false } };
   return user;
 };
 
-export function AuthProvider({ authData, children }: Props) {
+export const AuthProvider = ({ authData, children }: AuthProps) => {
   const [user, setUser] = useState<UserCtx>(
-    authData || { connected: false, details: {} }
+    authData || { connected: false, details: { error: false } }
   );
+
   const loginMutation = trpc.useMutation("auth-v1.login", {
-    onSuccess() {
+    onSuccess(data, variables, context) {
       setUser({
         connected: true,
         details: {
-          email: "toto@gmail.com",
+          email: variables.email,
+          error: false,
         },
       });
     },
-    onError(error) {
+    onError(error, variables, context) {
       console.log(error);
       setUser({
         connected: false,
-        details: {},
+        details: { error: true },
+      });
+    },
+  });
+
+  const logoutMutation = trpc.useMutation("token-v1.logout", {
+    onSuccess(data, variables, context) {
+      setUser({
+        connected: true,
+        details: { error: false },
+      });
+    },
+    onError(error, variables, context) {
+      console.log(error);
+      setUser({
+        connected: false,
+        details: { error: true },
       });
     },
   });
@@ -70,7 +71,7 @@ export function AuthProvider({ authData, children }: Props) {
   };
 
   const logout = () => {
-    setUser({ connected: false, details: {} });
+    logoutMutation.mutate();
   };
 
   const value = {
@@ -80,4 +81,4 @@ export function AuthProvider({ authData, children }: Props) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+};

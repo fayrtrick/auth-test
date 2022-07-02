@@ -5,8 +5,6 @@ import Link from "next/link";
 import { trpc } from "../utils/trpc";
 
 const Home: NextPage = () => {
-  const logoutMutation = trpc.useMutation("token-v1.logout");
-
   return (
     <>
       <Head>
@@ -16,7 +14,6 @@ const Home: NextPage = () => {
       </Head>
       <Link href="/auth/login">login</Link>
       <Link href="/auth/register">register</Link>
-      <button onClick={() => logoutMutation.mutate()}>logout</button>
     </>
   );
 };

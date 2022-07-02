@@ -2,20 +2,14 @@ import crypto from "crypto";
 import argon2 from "argon2";
 import nookies from "nookies";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { serialize } from "cookie";
 
 import { createRouter } from "./context";
 import { generateTokens } from "../../utils/token";
+import { UserDetailsSchema, UserSchema } from "../../utils/models/auth";
 
 export const authRouter = createRouter()
   .mutation("register", {
-    input: z.object({
-      email: z.string().email(),
-      password: z.string().min(8),
-      forename: z.string().min(1),
-      surname: z.string().min(1),
-    }),
+    input: UserSchema,
     async resolve({ ctx, input }) {
       const userExists = await ctx.prisma.user.findUnique({
         where: { email: input.email },
@@ -46,10 +40,7 @@ export const authRouter = createRouter()
     },
   })
   .mutation("login", {
-    input: z.object({
-      email: z.string().email(),
-      password: z.string().min(8),
-    }),
+    input: UserDetailsSchema,
     async resolve({ ctx, input }) {
       const user = await ctx.prisma.user.findUnique({
         where: { email: input.email },
