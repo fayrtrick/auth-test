@@ -24,3 +24,10 @@ model UserToken {
 
     user User @relation(fields: [userID], references: [id])
 }
+
+model Wine {
+    id     String @id @default(auto()) @map("_id") @db.ObjectId
+    name   String @unique
+    origin String
+    price  Float
+}

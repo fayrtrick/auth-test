@@ -15,7 +15,7 @@ const Login = () => {
     formState: { errors },
   } = useForm<User>({ resolver: zodResolver(UserSchema) });
 
-  const registerMutation = trpc.useMutation("auth-v1.register", {
+  const registerMutation = trpc.useMutation("auth/v1/register", {
     onSuccess: (data) => {
       console.log(data);
     },

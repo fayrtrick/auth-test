@@ -3,7 +3,7 @@ import { withTRPC } from "@trpc/next";
 import type { AppRouter } from "../server/router";
 import superjson from "superjson";
 import "../styles/globals.css";
-import { AuthProvider, getUser, UserCtx } from "../contexts/AuthContext";
+import { AuthProvider, getUser } from "../contexts/AuthContext";
 import App, { AppContext } from "next/app";
 
 const MyApp = ({ Component, pageProps }: any) => {

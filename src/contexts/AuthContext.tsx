@@ -28,11 +28,11 @@ export const AuthProvider = ({ authData, children }: AuthProps) => {
     authData || { connected: false, details: { error: false } }
   );
 
-  const getMutation = (mutation: "auth-v1.login" | "token-v1.logout") => {
+  const getMutation = (mutation: "auth/v1/login" | "token/v1/logout") => {
     return trpc.useMutation(mutation, {
       onSuccess(data, variables, context) {
         const user: UserCtx = { connected: false, details: { error: false } };
-        if (mutation === "auth-v1.login") {
+        if (mutation === "auth/v1/login") {
           user.connected = true;
           user.details = { ...user.details, email: variables!.email };
         }
@@ -48,8 +48,8 @@ export const AuthProvider = ({ authData, children }: AuthProps) => {
     });
   };
 
-  const loginMutation = getMutation("auth-v1.login");
-  const logoutMutation = getMutation("token-v1.logout");
+  const loginMutation = getMutation("auth/v1/login");
+  const logoutMutation = getMutation("token/v1/logout");
 
   const login = () => {
     loginMutation.mutate({
