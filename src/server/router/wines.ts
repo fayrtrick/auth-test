@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { Wine, WineSchema } from "../../utils/models/wines";
+import { WineSchema } from "../../utils/models/wines";
 import { createRouter } from "./context";
 
 export const winesRouter = createRouter()

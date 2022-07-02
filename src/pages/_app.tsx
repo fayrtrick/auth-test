@@ -1,10 +1,11 @@
 // src/pages/_app.tsx
 import { withTRPC } from "@trpc/next";
-import type { AppRouter } from "../server/router";
 import superjson from "superjson";
-import "../styles/globals.css";
-import { AuthProvider, getUser } from "../contexts/AuthContext";
 import App, { AppContext } from "next/app";
+
+import "../styles/globals.css";
+import type { AppRouter } from "../server/router";
+import { AuthProvider, getUser } from "../contexts/AuthContext";
 
 const MyApp = ({ Component, pageProps }: any) => {
   return (
