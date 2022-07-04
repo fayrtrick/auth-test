@@ -1,6 +1,7 @@
 import { NextPageContext } from "next";
 import React, { createContext, ReactNode, useContext, useState } from "react";
 import nookies from "nookies";
+import jwtDecode, { JwtPayload } from "jwt-decode";
 
 import { trpc } from "../utils/trpc";
 import {
@@ -9,10 +10,6 @@ import {
   UserCtx,
   ErrorCtx,
 } from "../utils/models/auth";
-import { Mutation, useMutation } from "react-query";
-import { TRPCError } from "@trpc/server";
-import { TRPCClientErrorLike } from "@trpc/client";
-import { Router } from "next/router";
 
 const AuthContext = createContext<AuthContext>({} as AuthContext);
 
@@ -21,8 +18,19 @@ export const useAuth = () => {
 };
 
 export const getUser = async (ctx: NextPageContext) => {
-  const access_token = nookies.get(ctx);
-  console.log(access_token);
+  const accessToken = nookies.get(ctx).access_token;
+  if (!accessToken) return;
+
+  const decodedAccessToken: JwtPayload = jwtDecode(accessToken);
+  const expiration = decodedAccessToken.exp;
+  if (expiration && expiration * 1000 < Date.now()) {
+    // check for refresh token to regenerate an access_token
+    nookies.destroy(ctx, "access_token");
+    return;
+  }
+
+  // check token and get informations about them
+
   const user = { connected: false, details: { error: false } };
   return user;
 };
@@ -63,12 +71,12 @@ export const AuthProvider = ({ authData, children }: AuthProps) => {
   });
 
   const register = trpc.useMutation("auth.register", {
-    onSuccess: (data) => {
-      localStorage.setItem;
-    },
+    onSuccess: (data) => onAuthSuccess(data.email, "toto@gmail.com"),
+    onError: (err) => onAuthError(err),
   });
 
   const onAuthSuccess = (xsrfToken: string, email: string) => {
+    setErrors({ error: false, message: "" });
     localStorage.setItem("xsrfToken", xsrfToken);
     setUser({
       connected: true,
@@ -90,6 +98,7 @@ export const AuthProvider = ({ authData, children }: AuthProps) => {
     user,
     errors,
     login,
+    register,
     logout,
   };
 

@@ -24,6 +24,7 @@ export type AuthContext = {
   user: UserCtx;
   errors: ErrorCtx;
   login: any;
+  register: any;
   logout: () => void;
 };
 export type AuthProps = {

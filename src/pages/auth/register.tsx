@@ -5,45 +5,37 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { trpc } from "../../utils/trpc";
 import styles from "../../styles/auth.module.scss";
 import { User, UserSchema } from "../../utils/models/auth";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Login = () => {
-  const [apiErrors, setApiErrors] = useState("");
+  const { user, register, errors: APIError } = useAuth();
 
   const {
-    register,
+    register: registerField,
     handleSubmit,
     formState: { errors },
   } = useForm<User>({ resolver: zodResolver(UserSchema) });
 
-  const registerMutation = trpc.useMutation("auth/v1/register", {
-    onSuccess: (data) => {
-      console.log(data);
-    },
-    onError: (error) => {
-      setApiErrors(error.message);
-    },
-  });
-
   const onSubmit = (data: User) => {
-    console.log(JSON.stringify(data));
-    registerMutation.mutate(data);
+    register.mutate(data);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
       <div>
+        <div>User connected: {user.connected ? "True" : "False"}</div>
+        <div>{APIError.error && APIError.message}</div>
         <h1>Register</h1>
-        {apiErrors}
         <ul>
           {<li>{errors.email?.message}</li>}
           {<li>{errors.forename?.message}</li>}
           {<li>{errors.surname?.message}</li>}
           {<li>{errors.password?.message}</li>}
         </ul>
-        <input placeholder="Email" {...register("email")} />
-        <input placeholder="Prénom" {...register("surname")} />
-        <input placeholder="Nom" {...register("forename")} />
-        <input placeholder="Password" {...register("password")} />
+        <input placeholder="Email" {...registerField("email")} />
+        <input placeholder="Prénom" {...registerField("surname")} />
+        <input placeholder="Nom" {...registerField("forename")} />
+        <input placeholder="Password" {...registerField("password")} />
         <button type="submit">Envoyer</button>
       </div>
     </form>

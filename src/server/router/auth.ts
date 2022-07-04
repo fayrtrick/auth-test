@@ -70,7 +70,7 @@ export const authRouter = createRouter()
       nookies.set(ctx, "access_token", accessToken, {
         httpOnly: true,
         secure: false,
-        maxAge: 60 * 14,
+        maxAge: 60 * 1,
         path: "/",
       });
       nookies.set(ctx, "refresh_token", refreshToken, {

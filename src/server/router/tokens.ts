@@ -11,35 +11,40 @@ const tokenSchema = z.object({
 });
 
 export const tokensRouter = createRouter()
+  // .mutation("refresh", {
+  //   input: z.object({
+  //     refreshToken: z.string().min(1, { message: "Token required." }),
+  //   }),
+  //   async resolve({ ctx, input }) {
+  //     verifyRefreshToken(ctx.req.body)
+  //       .then(({ tokenDetails }: JwtPayload) => {
+  //         const payload = {
+  //           email: tokenDetails.email,
+  //           xsrfToken: tokenDetails.xsrfToken,
+  //         };
+  //         const accessToken = jwt.sign(
+  //           payload,
+  //           process.env.ACCESS_TOKEN_PRIVATE_KEY as string,
+  //           { expiresIn: "14m" }
+  //         );
+  //         nookies.set(ctx, "access_token", accessToken, {
+  //           httpOnly: true,
+  //           secure: true,
+  //           maxAge: 60 * 14,
+  //           path: "/",
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         throw new TRPCError({
+  //           code: "INTERNAL_SERVER_ERROR",
+  //           message: "Erreur lors de la création du token.",
+  //         });
+  //       });
+  //   },
+  // })
   .mutation("refresh", {
-    input: z.object({
-      refreshToken: z.string().min(1, { message: "Token required." }),
-    }),
-    async resolve({ ctx, input }) {
-      verifyRefreshToken(ctx.req.body)
-        .then(({ tokenDetails }: JwtPayload) => {
-          const payload = {
-            email: tokenDetails.email,
-            xsrfToken: tokenDetails.xsrfToken,
-          };
-          const accessToken = jwt.sign(
-            payload,
-            process.env.ACCESS_TOKEN_PRIVATE_KEY as string,
-            { expiresIn: "14m" }
-          );
-          nookies.set(ctx, "access_token", accessToken, {
-            httpOnly: true,
-            secure: true,
-            maxAge: 60 * 14,
-            path: "/",
-          });
-        })
-        .catch((err) => {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Erreur lors de la création du token.",
-          });
-        });
+    async resolve({ ctx }) {
+      console.log(nookies.get(ctx));
     },
   })
   .mutation("logout", {
