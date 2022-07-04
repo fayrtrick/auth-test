@@ -1,5 +1,5 @@
 import { NextPageContext } from "next";
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import nookies from "nookies";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 
@@ -8,8 +8,9 @@ import {
   AuthContext,
   AuthProps,
   UserCtx,
-  ErrorCtx,
+  UserLogin,
 } from "../utils/models/auth";
+import axios from "axios";
 
 const AuthContext = createContext<AuthContext>({} as AuthContext);
 
@@ -17,77 +18,81 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
-export const getUser = async (ctx: NextPageContext) => {
-  const accessToken = nookies.get(ctx).access_token;
-  if (!accessToken) return;
-
-  const decodedAccessToken: JwtPayload = jwtDecode(accessToken);
-  const expiration = decodedAccessToken.exp;
-  if (expiration && expiration * 1000 < Date.now()) {
-    // check for refresh token to regenerate an access_token
-    nookies.destroy(ctx, "access_token");
-    return;
+export const getUser = async (ctx: any) => {
+  axios.defaults.baseURL = "http://localhost:3000/";
+  let accessToken = nookies.get(ctx).access_token || "";
+  let decodedAccessToken: any = undefined;
+  if (accessToken) decodedAccessToken = jwtDecode(accessToken);
+  if (
+    !accessToken ||
+    (decodedAccessToken.exp && decodedAccessToken.exp * 1000 < Date.now())
+  ) {
+    const refreshToken = nookies.get(ctx).refresh_token;
+    if (!refreshToken) return;
+    await axios
+      .get("/api/auth/refresh", {
+        headers: {
+          cookie: ctx.req.headers.cookie,
+        },
+      })
+      .then(async (data) => {
+        accessToken = data.data.token;
+        await nookies.set(ctx, "access_token", data.data.token, {
+          httpOnly: true,
+          secure: false,
+          maxAge: 60 * 14,
+          path: "/",
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        return;
+      });
   }
 
-  // check token and get informations about them
-
-  const user = { connected: false, details: { error: false } };
-  return user;
+  return axios
+    .get("/api/user/reconnect", {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+      },
+    })
+    .then((res) => {
+      return { connected: true, details: { ...res.data.user } };
+    })
+    .catch((err) => {
+      return;
+    });
 };
 
 export const AuthProvider = ({ authData, children }: AuthProps) => {
   const [user, setUser] = useState<UserCtx>(
-    authData || { connected: false, details: { error: false } }
+    authData || { connected: false, details: {} }
   );
 
-  const [errors, setErrors] = useState<ErrorCtx>({ error: false, message: "" });
-
-  // const getMutation = (mutation: "auth/v1/login" | "token/v1/logout") => {
-  //   return trpc.useMutation(mutation, {
-  //     onSuccess(data, variables, context) {
-  //       const user: UserCtx = { connected: false, details: { error: false } };
-  //       if (mutation === "auth/v1/login") {
-  //         user.connected = true;
-  //         user.details = { ...user.details, email: variables!.email };
-  //       }
-  //       setUser(user);
-  //     },
-  //     onError(error, variables, context) {
-  //       console.log(error);
-  //       setUser({
-  //         connected: false,
-  //         details: { error: true },
-  //       });
-  //     },
-  //   });
-  // };
-
-  // const loginMutation = getMutation("auth/v1/login");
-  // const logoutMutation = getMutation("token/v1/logout");
-
-  const login = trpc.useMutation("auth.login", {
-    onSuccess: (data) => onAuthSuccess(data, "toto@gmail.com"),
-    onError: (err) => onAuthError(err),
-  });
+  const login = (data: UserLogin) => {
+    return axios
+      .post("/api/auth/login", data)
+      .then((res) => onAuthSuccess(res.data.xsrfToken))
+      .catch((err) => onAuthError(err.response.data));
+  };
 
   const register = trpc.useMutation("auth.register", {
-    onSuccess: (data) => onAuthSuccess(data.email, "toto@gmail.com"),
+    onSuccess: (data) => onAuthSuccess(data.email),
     onError: (err) => onAuthError(err),
   });
 
-  const onAuthSuccess = (xsrfToken: string, email: string) => {
-    setErrors({ error: false, message: "" });
+  const onAuthSuccess = (xsrfToken: string) => {
     localStorage.setItem("xsrfToken", xsrfToken);
     setUser({
       connected: true,
       details: {
-        email: email,
+        email: "tot@gmail.com",
       },
     });
   };
 
   const onAuthError = (err: any) => {
-    setErrors({ error: true, message: err.message });
+    return err.message;
   };
 
   const logout = () => {
@@ -96,7 +101,6 @@ export const AuthProvider = ({ authData, children }: AuthProps) => {
 
   const value = {
     user,
-    errors,
     login,
     register,
     logout,

@@ -5,24 +5,23 @@ import { Mutation, UseMutateFunction, UseMutationResult } from "react-query";
 import { z } from "zod";
 
 // Schemas
-export const UserSchema = z.object({
+export const UserRegisterSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   forename: z.string().min(1),
   surname: z.string().min(1),
 });
 
-export const UserDetailsSchema = z.object({
+export const UserLoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
 
 // Types
-export type User = z.infer<typeof UserSchema>;
-export type UserDetails = z.infer<typeof UserDetailsSchema>;
+export type UserRegister = z.infer<typeof UserRegisterSchema>;
+export type UserLogin = z.infer<typeof UserLoginSchema>;
 export type AuthContext = {
   user: UserCtx;
-  errors: ErrorCtx;
   login: any;
   register: any;
   logout: () => void;
@@ -36,8 +35,4 @@ export type UserCtx = {
   details: {
     email?: string;
   };
-};
-export type ErrorCtx = {
-  error: boolean;
-  message: string;
 };

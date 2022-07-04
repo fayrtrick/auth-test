@@ -9,9 +9,9 @@ type RefreshToken = {
   message: string;
 };
 
-export const generateTokens = async (user: User, xsrfToken: string) => {
+export const generateTokens = async (user: User) => {
   try {
-    const payload = { email: user.email, xsrfToken };
+    const payload = { email: user.email };
     const accessToken = jwt.sign(
       payload,
       process.env.ACCESS_TOKEN_PRIVATE_KEY as string,
